@@ -58,6 +58,9 @@
           Class constructors.
         </li>
         <li>
+          <code>public</code> modifier on top-level methods of compact source files.
+        </li>
+        <li>
           Nested <code>enum</code> definitions that are declared as <code>static</code>.
         </li>
         <li>
@@ -74,7 +77,8 @@
         </ol>
 
         <p>
-          ATTENTION: Top-level members of compact source files are skipped from validation by this check.
+          ATTENTION: In compact source files, only @<code>public</code> modifier on top-level
+          methods is validated. Other top-level modifiers are skipped.
         </p>
 
         <p>

@@ -29,6 +29,9 @@
  Class constructors.
  &lt;/li&gt;
  &lt;li&gt;
+ &lt;code&gt;public&lt;/code&gt; modifier on top-level methods of compact source files.
+ &lt;/li&gt;
+ &lt;li&gt;
  Nested &lt;code&gt;enum&lt;/code&gt; definitions that are declared as &lt;code&gt;static&lt;/code&gt;.
  &lt;/li&gt;
  &lt;li&gt;
@@ -45,7 +48,8 @@
  &lt;/ol&gt;
 
  &lt;p&gt;
- ATTENTION: Top-level members of compact source files are skipped from validation by this check.
+ ATTENTION: In compact source files, only @&lt;code&gt;public&lt;/code&gt; modifier on top-level
+ methods is validated. Other top-level modifiers are skipped.
  &lt;/p&gt;
 
  &lt;p&gt;

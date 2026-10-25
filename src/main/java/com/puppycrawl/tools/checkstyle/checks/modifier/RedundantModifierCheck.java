@@ -56,6 +56,9 @@ import com.puppycrawl.tools.checkstyle.utils.TokenUtil;
  * Class constructors.
  * </li>
  * <li>
+ * {@code public} modifier on top-level methods of compact source files.
+ * </li>
+ * <li>
  * Nested {@code enum} definitions that are declared as {@code static}.
  * </li>
  * <li>
@@ -72,7 +75,8 @@ import com.puppycrawl.tools.checkstyle.utils.TokenUtil;
  * </ol>
  *
  * <p>
- * ATTENTION: Top-level members of compact source files are skipped from validation by this check.
+ * ATTENTION: In compact source files, only @{@code public} modifier on top-level
+ * methods is validated. Other top-level modifiers are skipped.
  * </p>
  *
  * <p>
@@ -435,6 +439,9 @@ public class RedundantModifierCheck extends AbstractCheck {
                 parent = parent.getParent();
             }
         }
+        if (isTopLevelMethodInCompactSource(ast)) {
+            checkForRedundantModifier(ast, TokenTypes.LITERAL_PUBLIC);
+        }
         if (checkFinal && !isAnnotatedWithSafeVarargs(ast)) {
             checkForRedundantModifier(ast, TokenTypes.FINAL);
         }
@@ -542,6 +549,16 @@ public class RedundantModifierCheck extends AbstractCheck {
     private static boolean isEnumMember(DetailAST ast) {
         final DetailAST parentTypeDef = ast.getParent().getParent();
         return parentTypeDef.getType() == TokenTypes.ENUM_DEF;
+    }
+
+    /**
+     * Checks if a given method is declared at the top level of a compact source file.
+     *
+     * @param methodDef method definition node
+     * @return true if the method's parent is a compact compilation unit
+     */
+    private static boolean isTopLevelMethodInCompactSource(DetailAST methodDef) {
+        return methodDef.getParent().getType() == TokenTypes.COMPACT_COMPILATION_UNIT;
     }
 
     /**
