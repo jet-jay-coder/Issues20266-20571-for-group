@@ -33,7 +33,7 @@ import com.puppycrawl.tools.checkstyle.api.TokenTypes;
  * Checks for duplicate implementations in {@code switch} statement or {@code switch} expression branches.
  * </div>
  *
- * @since 10.22.0
+ * @since 14.4.0
  */
 @StatelessCheck
 public class DuplicateSwitchBranchCheck extends AbstractCheck {
