@@ -7,7 +7,7 @@
   </head>
   <body>
     <section name="DuplicateSwitchBranch">
-      <p>Since Checkstyle 10.22.0</p>
+      <p>Since Checkstyle 14.4.0</p>
       <div class="toc-panel">
   <input type="checkbox" id="toc-toggle" class="toc-toggle-checkbox" checked="checked"/>
   <label for="toc-toggle" class="toc-toggle-arrow" title="Collapse"/>
@@ -50,15 +50,27 @@
           Example:
         </p>
         <div class="wrapper"><pre class="prettyprint"><code class="language-java">
-class Example1 {
+public class Example1 {
   int getNumber(String value) {
     switch (value) {
       case "A":
         return 1;
-      case "B": // violation 'Duplicate switch branch implementation identical to the branch at line 5'
+      // violation below 'Duplicate switch branch implementation identical to the branch at line 15'
+      case "B":
         return 1;
       case "C":
         return 2;
+      default:
+        return 0;
+    }
+  }
+
+  int getNumberMerged(String value) {
+    // ok, branches with the same body already share one set of labels
+    switch (value) {
+      case "A":
+      case "B":
+        return 1;
       default:
         return 0;
     }
@@ -94,8 +106,8 @@ class Example1 {
       <subsection name="Fully Qualified Name" id="DuplicateSwitchBranch_Fully_Qualified_Name">
         <p>com.puppycrawl.tools.checkstyle.checks.coding.DuplicateSwitchBranchCheck</p>
         <p>
-            Use this fully qualified class name in configuration when an exact class reference is
-            required.
+          Use this fully qualified class name in configuration when an exact class reference is
+          required.
         </p>
       </subsection>
 
