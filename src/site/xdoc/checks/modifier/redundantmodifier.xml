@@ -77,8 +77,10 @@
         </ol>
 
         <p>
-          ATTENTION: In compact source files, only @<code>public</code> modifier on top-level
-          methods is validated. Other top-level modifiers are skipped.
+          ATTENTION: In compact source files, only <code>public</code> modifier on top-level
+          methods is validated. Other top-level modifiers are skipped. Methods that override
+          a method of <code>java.lang.Object</code> are skipped, because their access cannot be
+          reduced to package-private.
         </p>
 
         <p>

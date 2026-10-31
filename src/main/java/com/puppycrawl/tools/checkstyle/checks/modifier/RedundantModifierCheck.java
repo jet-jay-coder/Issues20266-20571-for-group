@@ -22,10 +22,12 @@ package com.puppycrawl.tools.checkstyle.checks.modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.puppycrawl.tools.checkstyle.StatelessCheck;
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
+import com.puppycrawl.tools.checkstyle.api.FullIdent;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 import com.puppycrawl.tools.checkstyle.utils.CommonUtil;
 import com.puppycrawl.tools.checkstyle.utils.TokenUtil;
@@ -75,8 +77,10 @@ import com.puppycrawl.tools.checkstyle.utils.TokenUtil;
  * </ol>
  *
  * <p>
- * ATTENTION: In compact source files, only @{@code public} modifier on top-level
- * methods is validated. Other top-level modifiers are skipped.
+ * ATTENTION: In compact source files, only {@code public} modifier on top-level
+ * methods is validated. Other top-level modifiers are skipped. Methods that override
+ * a method of {@code java.lang.Object} are skipped, because their access cannot be
+ * reduced to package-private.
  * </p>
  *
  * <p>
@@ -182,6 +186,18 @@ public class RedundantModifierCheck extends AbstractCheck {
         TokenTypes.LITERAL_STATIC,
         TokenTypes.ABSTRACT,
     };
+
+    /**
+     * Names of {@code java.lang.Object} methods with no parameters that can be overridden.
+     * An override cannot have package-private access, so {@code public} is not redundant.
+     */
+    private static final Set<String> OVERRIDABLE_METHODS_WITHOUT_PARAMETERS =
+            Set.of("toString", "hashCode", "clone", "finalize");
+
+    /**
+     * Spellings of the {@code java.lang.Object} type.
+     */
+    private static final Set<String> OBJECT_TYPE_NAMES = Set.of("Object", "java.lang.Object");
 
     /**
      *  Constant for jdk 22 version number.
@@ -439,15 +455,25 @@ public class RedundantModifierCheck extends AbstractCheck {
                 parent = parent.getParent();
             }
         }
-        if (isTopLevelMethodInCompactSource(ast)) {
-            checkForRedundantModifier(ast, TokenTypes.LITERAL_PUBLIC);
-        }
+        processTopLevelMethodInCompactSource(ast);
         if (checkFinal && !isAnnotatedWithSafeVarargs(ast)) {
             checkForRedundantModifier(ast, TokenTypes.FINAL);
         }
 
         if (ast.findFirstToken(TokenTypes.SLIST) == null) {
             processAbstractMethodParameters(ast);
+        }
+    }
+
+    /**
+     * Checks for a redundant {@code public} modifier on a top-level method
+     * of a compact source file.
+     *
+     * @param ast method AST
+     */
+    private void processTopLevelMethodInCompactSource(DetailAST ast) {
+        if (isTopLevelMethodInCompactSource(ast) && !isMethodOverride(ast)) {
+            checkForRedundantModifier(ast, TokenTypes.LITERAL_PUBLIC);
         }
     }
 
@@ -559,6 +585,42 @@ public class RedundantModifierCheck extends AbstractCheck {
      */
     private static boolean isTopLevelMethodInCompactSource(DetailAST methodDef) {
         return methodDef.getParent().getType() == TokenTypes.COMPACT_COMPILATION_UNIT;
+    }
+
+    /**
+     * Checks if a method overrides a method of {@code java.lang.Object}. Such a method
+     * must stay {@code public}, because an override cannot reduce the access of the original.
+     *
+     * @param methodDef node of type {@link TokenTypes#METHOD_DEF}
+     * @return true if the method overrides {@code java.lang.Object} method
+     */
+    private static boolean isMethodOverride(DetailAST methodDef) {
+        final String name = methodDef.findFirstToken(TokenTypes.IDENT).getText();
+        final DetailAST parameters = methodDef.findFirstToken(TokenTypes.PARAMETERS);
+        final int parameterCount = parameters.getChildCount(TokenTypes.PARAMETER_DEF);
+        final boolean result;
+        if (parameterCount == 0) {
+            result = OVERRIDABLE_METHODS_WITHOUT_PARAMETERS.contains(name);
+        }
+        else {
+            result = parameterCount == 1
+                    && "equals".equals(name)
+                    && isObjectParameter(parameters.findFirstToken(TokenTypes.PARAMETER_DEF));
+        }
+        return result;
+    }
+
+    /**
+     * Checks if a parameter is declared with the type {@code java.lang.Object}.
+     *
+     * @param parameterDef node of type {@link TokenTypes#PARAMETER_DEF}
+     * @return true if the type is plain {@code Object}, not varargs
+     */
+    private static boolean isObjectParameter(DetailAST parameterDef) {
+        final String typeName = FullIdent.createFullIdentBelow(
+                parameterDef.findFirstToken(TokenTypes.TYPE)).getText();
+        return parameterDef.findFirstToken(TokenTypes.ELLIPSIS) == null
+                && OBJECT_TYPE_NAMES.contains(typeName);
     }
 
     /**

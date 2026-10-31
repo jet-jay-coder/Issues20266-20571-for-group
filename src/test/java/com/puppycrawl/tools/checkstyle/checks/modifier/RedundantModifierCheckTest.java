@@ -477,10 +477,15 @@ public class RedundantModifierCheckTest extends AbstractModuleTestSupport {
     public void testCompactSourceFilePublicMethod() throws Exception {
         final String[] expected = {
             "13:1: " + getCheckMessage(MSG_KEY, "public"),
+            "24:1: " + getCheckMessage(MSG_KEY, "public"),
+            "27:1: " + getCheckMessage(MSG_KEY, "public"),
+            "30:1: " + getCheckMessage(MSG_KEY, "public"),
+            "33:1: " + getCheckMessage(MSG_KEY, "public"),
         };
         verifyWithInlineConfigParser(
                 getNonCompilablePath(
                         "InputRedundantModifierCompactSourceFilePublicMethod.java"),
                 expected);
     }
+
 }

@@ -48,8 +48,10 @@
  &lt;/ol&gt;
 
  &lt;p&gt;
- ATTENTION: In compact source files, only @&lt;code&gt;public&lt;/code&gt; modifier on top-level
- methods is validated. Other top-level modifiers are skipped.
+ ATTENTION: In compact source files, only &lt;code&gt;public&lt;/code&gt; modifier on top-level
+ methods is validated. Other top-level modifiers are skipped. Methods that override
+ a method of &lt;code&gt;java.lang.Object&lt;/code&gt; are skipped, because their access cannot be
+ reduced to package-private.
  &lt;/p&gt;
 
  &lt;p&gt;

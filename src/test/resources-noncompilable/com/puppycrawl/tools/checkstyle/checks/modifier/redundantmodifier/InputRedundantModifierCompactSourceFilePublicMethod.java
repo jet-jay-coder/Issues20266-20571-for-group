@@ -14,6 +14,24 @@ public void myMethod() { }
 
 void main() { }
 
+public String toString() { return "x"; }
+
+public int hashCode() { return 1; }
+
+public boolean equals(Object other) { return false; }
+
+// violation below 'Redundant 'public' modifier.'
+public boolean equals(String other) { return false; }
+
+// violation below 'Redundant 'public' modifier.'
+public boolean equals(Object first, Object second) { return false; }
+
+// violation below 'Redundant 'public' modifier.'
+public boolean equals(Object... others) { return false; }
+
+// violation below 'Redundant 'public' modifier.'
+public boolean equals() { return false; }
+
 class Helper {
     public void inner() { }
 }
