@@ -70,4 +70,31 @@ public class InputDuplicateSwitchBranch {
             default -> 0;
         };
     }
+
+    void testFallThrough(int value) {
+        switch (value) {
+            case 1:
+                System.out.println("x");
+            case 2:
+                System.out.println("x");
+                break;
+            default:
+                break;
+        }
+    }
+
+    void testPatterns(Object o) {
+        switch (o) {
+            case Integer x -> System.out.println(x);
+            case String x -> System.out.println(x);
+            default -> { }
+        }
+    }
+
+    int testDefault(String value) {
+        return switch (value) {
+            case "A" -> 0;
+            default -> 0;
+        };
+    }
 }

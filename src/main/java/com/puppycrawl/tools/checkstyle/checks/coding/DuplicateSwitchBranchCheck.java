@@ -27,6 +27,7 @@ import com.puppycrawl.tools.checkstyle.StatelessCheck;
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
+import com.puppycrawl.tools.checkstyle.utils.CheckUtil;
 
 /**
  * <div>
@@ -65,20 +66,70 @@ public class DuplicateSwitchBranchCheck extends AbstractCheck {
         final List<List<DetailAST>> branchExecutableNodes = new ArrayList<>();
         final List<DetailAST> branchReportNodes = new ArrayList<>();
 
-        for (DetailAST child = ast.getFirstChild(); child != null; child = child.getNextSibling()) {
-            if (child.getType() == TokenTypes.CASE_GROUP) {
-                final List<DetailAST> executableNodes = getCaseGroupExecutableNodes(child);
-                if (!executableNodes.isEmpty()) {
-                    checkAndAddBranch(executableNodes, child.getFirstChild(), branchExecutableNodes, branchReportNodes);
-                }
+        for (DetailAST child = ast.getFirstChild(); child != null;
+             child = child.getNextSibling()) {
+            final List<DetailAST> executableNodes;
+            if (child.getType() == TokenTypes.CASE_GROUP && isComparableCaseGroup(child)) {
+                executableNodes = getCaseGroupExecutableNodes(child);
             }
-            else if (child.getType() == TokenTypes.SWITCH_RULE) {
-                final List<DetailAST> executableNodes = getSwitchRuleExecutableNodes(child);
-                if (!executableNodes.isEmpty()) {
-                    checkAndAddBranch(executableNodes, child.getFirstChild(), branchExecutableNodes, branchReportNodes);
-                }
+            else if (child.getType() == TokenTypes.SWITCH_RULE
+                    && isComparableSwitchRule(child)) {
+                executableNodes = getSwitchRuleExecutableNodes(child);
+            }
+            else {
+                executableNodes = List.of();
+            }
+            if (!executableNodes.isEmpty()) {
+                checkAndAddBranch(executableNodes, child.getFirstChild(),
+                        branchExecutableNodes, branchReportNodes);
             }
         }
+    }
+
+    /**
+     * Checks whether a case group can be merged with another one. Groups that fall
+     * through into the next group, or that use pattern labels, are skipped.
+     *
+     * @param caseGroup case group AST node
+     * @return true if the case group should be compared
+     */
+    private static boolean isComparableCaseGroup(DetailAST caseGroup) {
+        final DetailAST slist = caseGroup.findFirstToken(TokenTypes.SLIST);
+        final boolean fallsThrough = slist != null
+                && !CheckUtil.isTerminated(slist)
+                && caseGroup.getNextSibling().getType() == TokenTypes.CASE_GROUP;
+        return !fallsThrough && !hasPatternLabel(caseGroup);
+    }
+
+    /**
+     * Checks whether a switch rule can be merged with another one. The default rule
+     * and rules with pattern labels are skipped, since Java cannot merge them.
+     *
+     * @param switchRule switch rule AST node
+     * @return true if the switch rule should be compared
+     */
+    private static boolean isComparableSwitchRule(DetailAST switchRule) {
+        return switchRule.findFirstToken(TokenTypes.LITERAL_DEFAULT) == null
+                && !hasPatternLabel(switchRule);
+    }
+
+    /**
+     * Checks whether any case label of a branch is a pattern.
+     *
+     * @param branch case group or switch rule AST node
+     * @return true if a case label contains a pattern
+     */
+    private static boolean hasPatternLabel(DetailAST branch) {
+        boolean result = false;
+        for (DetailAST child = branch.getFirstChild(); child != null && !result;
+             child = child.getNextSibling()) {
+            if (child.getType() == TokenTypes.LITERAL_CASE) {
+                result = child.findFirstToken(TokenTypes.PATTERN_VARIABLE_DEF) != null
+                        || child.findFirstToken(TokenTypes.RECORD_PATTERN_DEF) != null
+                        || child.findFirstToken(TokenTypes.PATTERN_DEF) != null;
+            }
+        }
+        return result;
     }
 
     /**
