@@ -5,7 +5,8 @@
              name="DuplicateSwitchBranch"
              parent="com.puppycrawl.tools.checkstyle.TreeWalker">
          <description>&lt;div&gt;
- Checks for duplicate implementations in &lt;code&gt;switch&lt;/code&gt; statement or &lt;code&gt;switch&lt;/code&gt; expression branches.
+ Checks for duplicate implementations in &lt;code&gt;switch&lt;/code&gt; statement or
+ &lt;code&gt;switch&lt;/code&gt; expression branches.
  &lt;/div&gt;</description>
          <message-keys>
             <message-key key="duplicate.switch.branch"/>

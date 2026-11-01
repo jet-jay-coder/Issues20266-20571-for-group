@@ -34,7 +34,7 @@ public class DuplicateSwitchBranchCheckExamplesTest
     @Test
     public void testExample1() throws Exception {
         final String[] expected = {
-            "18:7: " + getCheckMessage(DuplicateSwitchBranchCheck.MSG_KEY, 15),
+            "19:7: " + getCheckMessage(DuplicateSwitchBranchCheck.MSG_KEY, 15),
         };
 
         verifyWithInlineConfigParser(

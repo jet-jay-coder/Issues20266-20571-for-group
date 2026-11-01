@@ -12,7 +12,7 @@ public class InputDuplicateSwitchBranch {
         switch (value) {
             case "A":
                 return 1;
-            case "B": // violation 'Duplicate\ switch\ branch\ implementation\ identical\ to\ the\ branch\ at\ line\ 13.'
+            case "B": // violation 'identical to the branch at line 13'
                 return 1;
             case "C":
                 return 2;
@@ -24,7 +24,7 @@ public class InputDuplicateSwitchBranch {
     int testExpression(String value) {
         return switch (value) {
             case "A" -> 1;
-            case "B" -> 1; // violation 'Duplicate\ switch\ branch\ implementation\ identical\ to\ the\ branch\ at\ line\ 26.'
+            case "B" -> 1; // violation 'identical to the branch at line 26'
             case "C" -> 2;
             default -> 0;
         };
@@ -63,7 +63,7 @@ public class InputDuplicateSwitchBranch {
                 int x = 1;
                 yield x;
             }
-            case "B" -> { // violation 'Duplicate\ switch\ branch\ implementation\ identical\ to\ the\ branch\ at\ line\ 62.'
+            case "B" -> { // violation 'identical to the branch at line 62'
                 int x = 1;
                 yield x;
             }

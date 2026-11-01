@@ -14,7 +14,8 @@ public class Example1 {
     switch (value) {
       case "A":
         return 1;
-      // violation below 'Duplicate switch branch implementation identical to the branch at line 15'
+      // violation 2 lines below """Duplicate switch branch implementation identical
+      //  to the branch at line 15."""
       case "B":
         return 1;
       case "C":

@@ -19,21 +19,22 @@
 
 package org.checkstyle.suppressionxpathfilter.coding;
 
-import java.io.File;
 import java.util.List;
 
 import org.checkstyle.suppressionxpathfilter.AbstractXpathTestSupport;
 import org.junit.jupiter.api.Test;
 
-import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.checks.coding.DuplicateSwitchBranchCheck;
 
 public class XpathRegressionDuplicateSwitchBranchTest
-    extends AbstractXpathTestSupport {
+        extends AbstractXpathTestSupport {
+
+    private static final Class<DuplicateSwitchBranchCheck> CLASS =
+            DuplicateSwitchBranchCheck.class;
 
     @Override
     protected String getCheckName() {
-        return DuplicateSwitchBranchCheck.class.getSimpleName();
+        return CLASS.getSimpleName();
     }
 
     @Override
@@ -42,24 +43,65 @@ public class XpathRegressionDuplicateSwitchBranchTest
     }
 
     @Test
-    public void testSimple() throws Exception {
-        final File fileToProcess =
-            new File(getPath("InputXpathDuplicateSwitchBranchSimple.java"));
-
-        final DefaultConfiguration moduleConfig =
-            createModuleConfig(DuplicateSwitchBranchCheck.class);
+    public void testOne() throws Exception {
         final String[] expectedViolation = {
-            "8:13: " + getCheckMessage(DuplicateSwitchBranchCheck.class,
-                DuplicateSwitchBranchCheck.MSG_KEY, 6),
+            "14:13: " + getCheckMessage(CLASS, DuplicateSwitchBranchCheck.MSG_KEY, 12),
         };
 
         final String switchPath = "/COMPILATION_UNIT"
-            + "/CLASS_DEF[./IDENT[@text='InputXpathDuplicateSwitchBranchSimple']]"
-            + "/OBJBLOCK/METHOD_DEF[./IDENT[@text='test']]/SLIST/LITERAL_SWITCH";
+                + "/CLASS_DEF[./IDENT[@text='InputXpathDuplicateSwitchBranchOne']]"
+                + "/OBJBLOCK/METHOD_DEF[./IDENT[@text='test']]/SLIST/LITERAL_SWITCH";
         final List<String> expectedXpathQueries = List.of(
-            switchPath + "/CASE_GROUP[./LITERAL_CASE/EXPR/NUM_INT[@text='1']]",
-            switchPath + "/CASE_GROUP/LITERAL_CASE"
+                switchPath + "/CASE_GROUP[./LITERAL_CASE/EXPR/NUM_INT[@text='1']]",
+                switchPath + "/CASE_GROUP/LITERAL_CASE"
         );
-        runVerifications(moduleConfig, fileToProcess, expectedViolation, expectedXpathQueries);
+
+        verifyXpathWithInlineConfigParser(
+                getPath("InputXpathDuplicateSwitchBranchOne.java"),
+                expectedXpathQueries,
+                expectedViolation);
     }
+
+    @Test
+    public void testTwo() throws Exception {
+        final String[] expectedViolation = {
+            "13:13: " + getCheckMessage(CLASS, DuplicateSwitchBranchCheck.MSG_KEY, 12),
+        };
+
+        final String switchPath = "/COMPILATION_UNIT"
+                + "/CLASS_DEF[./IDENT[@text='InputXpathDuplicateSwitchBranchTwo']]"
+                + "/OBJBLOCK/METHOD_DEF[./IDENT[@text='test']]/SLIST/LITERAL_RETURN"
+                + "/EXPR/LITERAL_SWITCH";
+        final List<String> expectedXpathQueries = List.of(
+                switchPath + "/SWITCH_RULE[./LITERAL_CASE/EXPR/STRING_LITERAL[@text='B']]",
+                switchPath + "/SWITCH_RULE/LITERAL_CASE"
+        );
+
+        verifyXpathWithInlineConfigParser(
+                getPath("InputXpathDuplicateSwitchBranchTwo.java"),
+                expectedXpathQueries,
+                expectedViolation);
+    }
+
+    @Test
+    public void testThree() throws Exception {
+        final String[] expectedViolation = {
+            "15:13: " + getCheckMessage(CLASS, DuplicateSwitchBranchCheck.MSG_KEY, 14),
+        };
+
+        final String switchPath = "/COMPILATION_UNIT"
+                + "/CLASS_DEF[./IDENT[@text='InputXpathDuplicateSwitchBranchThree']]"
+                + "/OBJBLOCK/CTOR_DEF[./IDENT[@text='InputXpathDuplicateSwitchBranchThree']]"
+                + "/SLIST/LITERAL_SWITCH";
+        final List<String> expectedXpathQueries = List.of(
+                switchPath + "/SWITCH_RULE[./LITERAL_CASE/EXPR/NUM_INT[@text='1']]",
+                switchPath + "/SWITCH_RULE/LITERAL_CASE"
+        );
+
+        verifyXpathWithInlineConfigParser(
+                getPath("InputXpathDuplicateSwitchBranchThree.java"),
+                expectedXpathQueries,
+                expectedViolation);
+    }
+
 }

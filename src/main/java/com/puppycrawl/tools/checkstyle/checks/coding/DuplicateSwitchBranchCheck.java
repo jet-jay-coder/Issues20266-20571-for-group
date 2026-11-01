@@ -31,7 +31,8 @@ import com.puppycrawl.tools.checkstyle.utils.CheckUtil;
 
 /**
  * <div>
- * Checks for duplicate implementations in {@code switch} statement or {@code switch} expression branches.
+ * Checks for duplicate implementations in {@code switch} statement or
+ * {@code switch} expression branches.
  * </div>
  *
  * @since 14.4.0
@@ -43,6 +44,13 @@ public class DuplicateSwitchBranchCheck extends AbstractCheck {
      * A key is pointing to the warning message text in "messages.properties".
      */
     public static final String MSG_KEY = "duplicate.switch.branch";
+
+    /**
+     * Creates a new {@code DuplicateSwitchBranchCheck} instance.
+     */
+    public DuplicateSwitchBranchCheck() {
+        // no code by default
+    }
 
     @Override
     public int[] getDefaultTokens() {
@@ -95,8 +103,7 @@ public class DuplicateSwitchBranchCheck extends AbstractCheck {
      */
     private static boolean isComparableCaseGroup(DetailAST caseGroup) {
         final DetailAST slist = caseGroup.findFirstToken(TokenTypes.SLIST);
-        final boolean fallsThrough = slist != null
-                && !CheckUtil.isTerminated(slist)
+        final boolean fallsThrough = !CheckUtil.isTerminated(slist)
                 && caseGroup.getNextSibling().getType() == TokenTypes.CASE_GROUP;
         return !fallsThrough && !hasPatternLabel(caseGroup);
     }
@@ -148,11 +155,11 @@ public class DuplicateSwitchBranchCheck extends AbstractCheck {
         boolean isDuplicate = false;
         int duplicateLineNumber = 0;
 
-        for (int i = 0; i < branchExecutableNodes.size(); i++) {
-            final List<DetailAST> prevExecutableNodes = branchExecutableNodes.get(i);
+        for (int index = 0; index < branchExecutableNodes.size(); index++) {
+            final List<DetailAST> prevExecutableNodes = branchExecutableNodes.get(index);
             if (areNodeListsEqual(executableNodes, prevExecutableNodes)) {
                 isDuplicate = true;
-                duplicateLineNumber = branchReportNodes.get(i).getLineNo();
+                duplicateLineNumber = branchReportNodes.get(index).getLineNo();
                 break;
             }
         }
@@ -174,7 +181,8 @@ public class DuplicateSwitchBranchCheck extends AbstractCheck {
      */
     private static List<DetailAST> getCaseGroupExecutableNodes(DetailAST caseGroup) {
         final List<DetailAST> executableNodes = new ArrayList<>();
-        for (DetailAST child = caseGroup.getFirstChild(); child != null; child = child.getNextSibling()) {
+        for (DetailAST child = caseGroup.getFirstChild(); child != null;
+             child = child.getNextSibling()) {
             if (child.getType() != TokenTypes.LITERAL_CASE
                     && child.getType() != TokenTypes.LITERAL_DEFAULT) {
                 executableNodes.add(child);
@@ -191,9 +199,9 @@ public class DuplicateSwitchBranchCheck extends AbstractCheck {
      */
     private static List<DetailAST> getSwitchRuleExecutableNodes(DetailAST switchRule) {
         final List<DetailAST> executableNodes = new ArrayList<>();
-        for (DetailAST child = switchRule.getFirstChild(); child != null; child = child.getNextSibling()) {
+        for (DetailAST child = switchRule.getFirstChild(); child != null;
+             child = child.getNextSibling()) {
             if (child.getType() != TokenTypes.LITERAL_CASE
-                    && child.getType() != TokenTypes.LITERAL_DEFAULT
                     && child.getType() != TokenTypes.LAMBDA) {
                 executableNodes.add(child);
             }
@@ -211,8 +219,8 @@ public class DuplicateSwitchBranchCheck extends AbstractCheck {
     private static boolean areNodeListsEqual(List<DetailAST> list1, List<DetailAST> list2) {
         boolean result = list1.size() == list2.size();
         if (result) {
-            for (int i = 0; i < list1.size(); i++) {
-                if (!isAstEqual(list1.get(i), list2.get(i))) {
+            for (int index = 0; index < list1.size(); index++) {
+                if (!isAstEqual(list1.get(index), list2.get(index))) {
                     result = false;
                     break;
                 }
@@ -229,20 +237,17 @@ public class DuplicateSwitchBranchCheck extends AbstractCheck {
      * @return true if subtrees are structurally identical
      */
     private static boolean isAstEqual(DetailAST node1, DetailAST node2) {
-        if (node1 == node2) {
-            return true;
-        }
+        final boolean result;
         if (node1 == null || node2 == null) {
-            return false;
+            result = node1 == node2;
         }
-        if (node1.getType() != node2.getType()) {
-            return false;
+        else {
+            result = node1.getType() == node2.getType()
+                    && Objects.equals(node1.getText(), node2.getText())
+                    && isAstEqual(node1.getFirstChild(), node2.getFirstChild())
+                    && isAstEqual(node1.getNextSibling(), node2.getNextSibling());
         }
-        if (!Objects.equals(node1.getText(), node2.getText())) {
-            return false;
-        }
-
-        return isAstEqual(node1.getFirstChild(), node2.getFirstChild())
-                && isAstEqual(node1.getNextSibling(), node2.getNextSibling());
+        return result;
     }
+
 }

@@ -24,6 +24,7 @@ import static com.puppycrawl.tools.checkstyle.checks.coding.DuplicateSwitchBranc
 import org.junit.jupiter.api.Test;
 
 import com.puppycrawl.tools.checkstyle.AbstractModuleTestSupport;
+import com.puppycrawl.tools.checkstyle.utils.CommonUtil;
 
 public class DuplicateSwitchBranchCheckTest extends AbstractModuleTestSupport {
 
@@ -39,8 +40,15 @@ public class DuplicateSwitchBranchCheckTest extends AbstractModuleTestSupport {
             "27:13: " + getCheckMessage(MSG_KEY, 26),
             "66:13: " + getCheckMessage(MSG_KEY, 62),
         };
-        verify(createModuleConfig(DuplicateSwitchBranchCheck.class),
+        verifyWithInlineConfigParser(
                 getPath("InputDuplicateSwitchBranch.java"), expected);
+    }
+
+    @Test
+    public void testSkippedBranches() throws Exception {
+        final String[] expected = CommonUtil.EMPTY_STRING_ARRAY;
+        verifyWithInlineConfigParser(
+                getPath("InputDuplicateSwitchBranchSkippedBranches.java"), expected);
     }
 
     @Test
@@ -53,4 +61,5 @@ public class DuplicateSwitchBranchCheckTest extends AbstractModuleTestSupport {
                 getNonCompilablePath("compact/InputDuplicateSwitchBranchCompactSourceFile.java"),
                 expected);
     }
+
 }

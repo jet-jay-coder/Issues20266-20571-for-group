@@ -31,7 +31,8 @@
 </div>
       <subsection name="Description" id="DuplicateSwitchBranch_Description">
         <div>
-          Checks for duplicate implementations in <code>switch</code> statement or <code>switch</code> expression branches.
+          Checks for duplicate implementations in <code>switch</code> statement or
+          <code>switch</code> expression branches.
         </div>
       </subsection>
 
@@ -55,7 +56,8 @@ public class Example1 {
     switch (value) {
       case "A":
         return 1;
-      // violation below 'Duplicate switch branch implementation identical to the branch at line 15'
+      // violation 2 lines below """Duplicate switch branch implementation identical
+      //  to the branch at line 15."""
       case "B":
         return 1;
       case "C":
